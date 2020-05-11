@@ -80,3 +80,12 @@ func isTelephoneExist(db *gorm.DB, telephone string) bool {
 	}
 	return false
 }
+
+func Login(context *gin.Context) {
+	//获取参数
+	//数据验证
+	//判断手机号
+	//判断密码
+	//发放token
+	//返回结果
+}
