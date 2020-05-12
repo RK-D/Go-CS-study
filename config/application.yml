@@ -1,0 +1,10 @@
+server:
+  port: 8080
+datasource:
+  driverName: mysql
+  database: go_study
+  host: 127.0.0.1
+  port: 3306
+  username: root
+  password: 123456
+  charset: utf8idx_users_deleted_at
