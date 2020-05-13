@@ -1,5 +1,5 @@
 server:
-  port: 8080
+  port: 8848
 datasource:
   driverName: mysql
   database: go_study
@@ -7,4 +7,4 @@ datasource:
   port: 3306
   username: root
   password: 123456
-  charset: utf8idx_users_deleted_at
+  charset: utf8

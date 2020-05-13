@@ -13,13 +13,30 @@ import (
 	"pers.study/cstest/util"
 )
 
+//查询手机号实现
+func isTelephoneExist(db *gorm.DB, telephone string) bool {
+	var user model.User
+	db.Where("telephone = ?", telephone).First(&user)
+	if user.ID != 0 {
+		return true
+	}
+	return false
+}
+
 func Register(context *gin.Context) {
 
 	DB := common.GetDB()
+	//使用map获取请求参数,但是map传参不方便后期调试，因为信息没有被表示，别人靠猜很麻烦，所以用结构体自定义类型
+	//var requestMap = make(map[string]string)
+	//json.NewDecoder(context.Request.Body).Decode(&requestMap)
+	var requestUser = model.User{}
+	//json.NewDecoder(context.Request.Body).Decode(&requestUser)
+	context.Bind(&requestUser) //gin的方法
+
 	//1.获取参数
-	name := context.PostForm("name")
-	telephone := context.PostForm("telephone")
-	password := context.PostForm("password")
+	name := requestUser.Name
+	telephone := requestUser.Telephone
+	password := requestUser.Password
 
 	//2.数据验证
 	//手机必须为11位
@@ -110,27 +127,26 @@ func Register(context *gin.Context) {
 		Password:  string(hasPassword),
 	}
 	DB.Create(&newUser)
-
-	//5.返回结果
-	//context.JSON(
-	//	http.StatusUnprocessableEntity,
-	//	gin.H{
-	//		"code ": 200,
-	//		"msg ":  "注册成功",
-	//	})
-
-	response.Success(context, nil, "注册成功")
-
-}
-
-//查询手机号实现
-func isTelephoneExist(db *gorm.DB, telephone string) bool {
-	var user model.User
-	db.Where("telephone = ?", telephone).First(&user)
-	if user.ID != 0 {
-		return true
+	//注册侧成功后直接发放token ，自动登录，免去重新输入用户名密码登录
+	//发放token
+	token, err := common.ReleaseToken(newUser)
+	if err != nil {
+		response.Response(
+			context,
+			http.StatusUnprocessableEntity,
+			500,
+			nil,
+			"系统异常",
+		)
+		log.Printf("token error : %v", err)
+		return
 	}
-	return false
+	// 返回结果
+	response.Success(
+		context,
+		gin.H{"token ": token},
+		"注册成功",
+	)
 }
 
 func Login(context *gin.Context) {
